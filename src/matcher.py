@@ -6,7 +6,11 @@ def parse_input(filename: str) -> Tuple[int, List[List[int]], List[List[int]]]:
     try:
         with open(filepath, 'r') as file:
             content = file.read().split("\n")
-        
+
+        if content == "":
+            raise Exception("No content in input.")
+            sys.exit(1)
+
         n = int(content[0])
         hospital_section = content[1:n+1]
         student_section = content[n+1:]
@@ -20,9 +24,10 @@ def parse_input(filename: str) -> Tuple[int, List[List[int]], List[List[int]]]:
         student_prefs = []
 
         for i in range(n):
-            if n != len(hospital_section[i]) or n != len(student_section[i]):
+            if n != len(hospital_section[i].split()) or n != len(student_section[i].split()):
                 raise Exception("Invalid input in preferences.")
                 sys.exit(1)
+                
             hospital_prefs.append(list(map(int, hospital_section[i].split())))
             student_prefs.append(list(map(int, student_section[i].split())))
         
