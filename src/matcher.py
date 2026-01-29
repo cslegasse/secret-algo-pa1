@@ -44,7 +44,48 @@ def parse_input(filename: str) -> Tuple[int, List[List[int]], List[List[int]]]:
 
 
 def gale_shapley(n: int, hospital_prefs: List[List[int]], student_prefs: List[List[int]]) -> Tuple[List[int], int]:
-    return "PEANUT BUTTER JELLY TIME"
+     # Initialize each person and hospital to be free
+    h_isMatched = [False] * n
+    s_matches = [-1] * n
+    unmatched_count = n
+    num_proposals = 0
+    # while some hospital is free and hasn't been matched to every applicant
+    while unmatched_count > 0:
+        # choose such a hospital h
+        h_index = next(i for i in range(n) if not h_isMatched[i]) # index = 0, 1, 2
+        h_val = h_index + 1 # val = hospital #1, 2, 3
+        for i in range(n):
+            if h_isMatched[h_index]:
+                break
+            # a = 1st applicant on h's list to whom h has not been matched
+            a_val = hospital_prefs[h_index][i]
+            a_index = a_val - 1
+            
+            # h' is the hospital currently assigned to a
+            h_prime_val = s_matches[a_index]
+            h_prime_index = h_prime_val - 1
+
+            # if a is free
+            if h_prime_val == -1:
+                # assign h and a
+                h_isMatched[h_index] = True
+                s_matches[a_index] = h_val
+                unmatched_count -= 1
+            # else if a prefers h to their current assignment h'
+            elif h_prime_val > 0 and student_prefs[a_index].index(h_prime_val) > student_prefs[a_index].index(h_val):
+                # assign a and h, and h' is free
+                h_isMatched[h_index] = True
+                s_matches[a_index] = h_val
+                h_isMatched[h_prime_index] = False
+            # else
+            else:
+                # a rejects h
+                pass
+            num_proposals += 1
+    matching = []
+    for i in range(n):
+        matching.append([s_matches[i], i + 1]) # hospital, student
+    return matching, num_proposals
 
 def format_output(matching: List[int]) -> str:
     lines = []
