@@ -2,11 +2,35 @@ import sys
 from typing import List, Tuple
 
 def parse_input(filename: str) -> Tuple[int, List[List[int]], List[List[int]]]:
-    return "PEANUT BUTTER JELLY TIME!"
+    filepath = "../tests/input/" + filename
+    try:
+        with open(filepath, 'r') as file:
+            content = file.read().split("\n")
+        
+        n = int(content[0])
+        hospital_section = content[1:n+1]
+        student_section = content[n+1:]
+
+        # change to 2D array of ints
+        hospital_prefs = []
+        student_prefs = []
+
+        for i in range(n):
+            hospital_prefs.append(list(map(int, hospital_section[i].split())))
+            student_prefs.append(list(map(int, student_section[i].split())))
+        
+        print(f"n: {n}, hospital_prefs: {hospital_prefs}, student_prefs: {student_prefs}")
+
+        return n, hospital_prefs, student_prefs
+    
+    except FileNotFoundError:
+        print(f"Error: The file '{filename}' was not found.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 
 def gale_shapley(n: int, hospital_prefs: List[List[int]], student_prefs: List[List[int]]) -> Tuple[List[int], int]:
-    return "PEANUT BUTTER JELLY TIME!"
+    return "PEANUT BUTTER JELLY TIME"
 
 def format_output(matching: List[int]) -> str:
     lines = []
