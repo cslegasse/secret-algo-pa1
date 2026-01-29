@@ -11,11 +11,18 @@ def parse_input(filename: str) -> Tuple[int, List[List[int]], List[List[int]]]:
         hospital_section = content[1:n+1]
         student_section = content[n+1:]
 
+        if n != len(hospital_section) or n != len(student_section):
+            raise Exception("Invalid number of students or hospitals.")
+            sys.exit(1)
+
         # change to 2D array of ints
         hospital_prefs = []
         student_prefs = []
 
         for i in range(n):
+            if n != len(hospital_section[i]) or n != len(student_section[i]):
+                raise Exception("Invalid input in preferences.")
+                sys.exit(1)
             hospital_prefs.append(list(map(int, hospital_section[i].split())))
             student_prefs.append(list(map(int, student_section[i].split())))
         
@@ -25,8 +32,10 @@ def parse_input(filename: str) -> Tuple[int, List[List[int]], List[List[int]]]:
     
     except FileNotFoundError:
         print(f"Error: The file '{filename}' was not found.")
+        sys.exit(1)
     except Exception as e:
         print(f"An error occurred: {e}")
+        sys.exit(1)
 
 
 def gale_shapley(n: int, hospital_prefs: List[List[int]], student_prefs: List[List[int]]) -> Tuple[List[int], int]:
