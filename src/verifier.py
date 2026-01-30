@@ -9,8 +9,8 @@ def verify(inp, out):
     n = int(lines[0]) if lines else 0
     if n == 0: return (True, "VALID STABLE") if not load(out) else (False, "INVALID: non-empty matching for n=0")
 
-    hp = [list(map(int, lines[i].split())) for i in range(1, n+1)]
-    sp = [list(map(int, lines[n+i].split())) for i in range(1, n+1)]
+    hp = [list(map(int, lines[i].split())) for i in range(1, n+1)] # hospital prefs
+    sp = [list(map(int, lines[n+i].split())) for i in range(1, n+1)] # student prefs
 
     # Validate the preferences
     for i, p in enumerate(hp + sp):
@@ -38,7 +38,7 @@ def verify(inp, out):
         for s in hp[h]:
             s -= 1
             if s == h2s[h]: break  
-            if sr[s][h] < sr[s][s2h[s]]: 
+            if sr[s][h+1] < sr[s][s2h[s]+1]: 
                 return False, f"UNSTABLE: blocking pair H{h+1}-S{s+1}"
 
     return True, "VALID STABLE"

@@ -109,9 +109,12 @@ Output (`data/example_1.out`):
 We give the following assumptions which are made in our algorithm: 
 
 1. Input files are well-formed with valid preference lists
-2. All indices are 1-indexed
+2. All indices are 0-index processed and 1-indexed outputted
 3. Each hospital and student appears exactly once in every preference list
 4. The number of hospitals equals the number of students
 5. Hospitals are the proposing side
 
-## Performance Analysis
+## Performance
+Our python program simple does an empirical runtime analysis of the matching algorithm versus the verifying algorithm. The time complexity of each is O(n^2).
+
+![GS Benchmark Results](benchmark.png)
