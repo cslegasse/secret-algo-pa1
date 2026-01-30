@@ -1,129 +1,59 @@
 import sys
-from typing import List, Tuple
 
-def parse_input(filename: str) -> Tuple[int, List[List[int]], List[List[int]]]:
-    filepath = "../tests/input/" + filename
-    try:
-        with open(filepath, 'r') as file:
-            content = file.read().split("\n")
+def load(path):
+    with open(path) as f:
+        return [l.strip() for l in f if l.strip() and not l.startswith('#')]
 
-        if content == "":
-            raise Exception("No content in input.")
-            sys.exit(1)
+def match(inp):
+    lines = load(inp) # Load input file
+    n = int(lines[0]) if lines else 0
+    if n == 0: return [], 0
 
-        n = int(content[0])
-        hospital_section = content[1:n+1]
-        student_section = content[n+1:]
+    hp = [list(map(int, lines[i].split())) for i in range(1, n+1)] # hospital prefs
+    sp = [list(map(int, lines[n+i].split())) for i in range(1, n+1)] # student prefs
 
-        if n != len(hospital_section) or n != len(student_section):
-            raise Exception("Invalid number of students or hospitals.")
-            sys.exit(1)
+    for i, p in enumerate(hp + sp):
+        if sorted(p) != list(range(1, n+1)):
+            t = "Hospital" if i < n else "Student"
+            raise ValueError(f"{t} {(i % n) + 1} prefs not a permutation")
 
-        # change to 2D array of ints
-        hospital_prefs = []
-        student_prefs = []
+    sr = [{h: r for r, h in enumerate(p)} for p in sp] # student rankings
 
-        for i in range(n):
-            if n != len(hospital_section[i].split()) or n != len(student_section[i].split()):
-                raise Exception("Invalid input in preferences.")
-                sys.exit(1)
-                
-            hospital_prefs.append(list(map(int, hospital_section[i].split())))
-            student_prefs.append(list(map(int, student_section[i].split())))
-        
-        print(f"n: {n}, hospital_prefs: {hospital_prefs}, student_prefs: {student_prefs}")
+    free = list(range(n))  # free hospitals at 0 index
+    ptr = [0] * n          # Pointer to next s to propose to h
+    s2h = [-1] * n         # A student is matched or return -1 if free
+    props = 0
 
-        return n, hospital_prefs, student_prefs
-    
-    except FileNotFoundError:
-        print(f"Error: The file '{filename}' was not found.")
-        sys.exit(1)
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        sys.exit(1)
+    while free:
+        h = free.pop()
+        s = hp[h][ptr[h]] - 1  # denotes a 0-indexed student
+        ptr[h] += 1
+        props += 1
 
+        if s2h[s] == -1:  # The student is free
+            s2h[s] = h
+        elif sr[s][h+1] < sr[s][s2h[s]+1]:  # A student prefers h
+            free.append(s2h[s])
+            s2h[s] = h
+        else:  # A student rejects h
+            free.append(h)
 
-def gale_shapley(n: int, hospital_prefs: List[List[int]], student_prefs: List[List[int]]) -> Tuple[List[int], int]:
-     # Initialize each person and hospital to be free
-    h_isMatched = [False] * n
-    s_matches = [-1] * n
-    unmatched_count = n
-    num_proposals = 0
-    # while some hospital is free and hasn't been matched to every applicant
-    while unmatched_count > 0:
-        # choose such a hospital h
-        h_index = next(i for i in range(n) if not h_isMatched[i]) # index = 0, 1, 2
-        h_val = h_index + 1 # val = hospital #1, 2, 3
-        for i in range(n):
-            if h_isMatched[h_index]:
-                break
-            # a = 1st applicant on h's list to whom h has not been matched
-            a_val = hospital_prefs[h_index][i]
-            a_index = a_val - 1
-            
-            # h' is the hospital currently assigned to a
-            h_prime_val = s_matches[a_index]
-            h_prime_index = h_prime_val - 1
-
-            # if a is free
-            if h_prime_val == -1:
-                # assign h and a
-                h_isMatched[h_index] = True
-                s_matches[a_index] = h_val
-                unmatched_count -= 1
-            # else if a prefers h to their current assignment h'
-            elif h_prime_val > 0 and student_prefs[a_index].index(h_prime_val) > student_prefs[a_index].index(h_val):
-                # assign a and h, and h' is free
-                h_isMatched[h_index] = True
-                s_matches[a_index] = h_val
-                h_isMatched[h_prime_index] = False
-            # else
-            else:
-                # a rejects h
-                pass
-            num_proposals += 1
-    matching = []
-    for i in range(n):
-        matching.append([s_matches[i], i + 1]) # hospital, student
-    return matching, num_proposals
-
-def format_output(matching: List[int]) -> str:
-    lines = []
-    for h, s in enumerate(matching):
-        lines.append(f"{h + 1} {s}")
-    return '\n'.join(lines)
-
-
-def main():
-    if len(sys.argv) < 2:
-            print("python/python3 matcher.py <input_file> <matching_file>", file=sys.stderr)
-            sys.exit(1)
-
-    input_file = sys.argv[1]
-    output_file = sys.argv[2] if len(sys.argv) > 2 else None
-
-    try:
-        n, hospital_prefs, student_prefs = parse_input(input_file)
-        matching, num_proposals = gale_shapley(n, hospital_prefs, student_prefs)
-        output = format_output(matching)
-
-        if output_file:
-            with open(output_file, 'w') as f:
-                f.write(output + '\n')
-            print(f"Match written to {output_file}")
-            print(f"Proposals count: {num_proposals}")
-        else:
-            print(output)
-            print(f"\nProposals count: {num_proposals}", file=sys.stderr)
-
-    except FileNotFoundError:
-        print(f"Error: '{input_file}' not found", file=sys.stderr)
-        sys.exit(1)
-
-    except ValueError as e:
-        print(f"Error: {e}", file=sys.stderr)
-        sys.exit(1)
-
+    return [(s2h[s]+1, s+1) for s in range(n)], props
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) < 2:
+        print("Use as follows: python matcher.py <input> <output>", file=sys.stderr); sys.exit(1)
+
+    try:
+        M, props = match(sys.argv[1])
+        out = '\n'.join(f"{h} {s}" for h, s in M)
+
+        if len(sys.argv) > 2:
+            with open(sys.argv[2], 'w') as f: f.write(out + '\n')
+            print(f"Output is at {sys.argv[2]}, with # proposals: {props}")
+        else:
+            print(out)
+            print(f"\n # proposals: {props}", file=sys.stderr)
+
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr); sys.exit(1)
