@@ -11,12 +11,10 @@
 - [tests/](tests/) - Test files for verification
 
 ## Requirements/Compilation
-
 - Python 3.6 or higher
 - No external dependencies required (uses only standard library)
 
 ## Matcher
-
 The matcher takes an input file containing hospital and student preferences and outputs a stable matching.
 
 ```bash
@@ -57,7 +55,6 @@ The verifier will return any one of the following for a given input:
 - `UNSTABLE: <blocking_pair>` - The matching has a blocking pair
 
 ### Input Format
-
 ```
 n
 h1_pref1 h1_pref2 ... h1_prefn
@@ -75,7 +72,6 @@ sn_pref1 sn_pref2 ... sn_prefn
 - Lines n+2 to 2n+1: Student preference lists (1-indexed, space-separated)
 
 ### Output Format
-
 ```
 hospital_id student_id
 hospital_id student_id
@@ -105,11 +101,10 @@ Output (`data/example_1.out`):
 ```
 
 ## Assumptions
-
 We give the following assumptions which are made in our algorithm: 
 
 1. Input files are well-formed with valid preference lists
-2. All indices are 1-indexed
+2. All indices are 0-indexed
 3. Each hospital and student appears exactly once in every preference list
 4. The number of hospitals equals the number of students
 5. Hospitals are the proposing side
